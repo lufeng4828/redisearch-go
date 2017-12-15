@@ -1,7 +1,10 @@
 package redisearch
 
-import "sort"
-import "encoding/json"
+import (
+	"fmt"
+	"sort"
+	"encoding/json"
+)
 
 func SprintInterface(data interface{}) string {
 	b, err := json.Marshal(data)
