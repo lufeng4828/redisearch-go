@@ -22,6 +22,27 @@ func NewAutocompleter(addr, name string) *Autocompleter {
 	}
 }
 
+// NewAutocompleterByPool creates a new Autocompleter with the given pool
+func NewAutocompleterByPool(pool interface{}, name string) *Autocompleter {
+	switch pool.(type){
+	case *SingleHostPool:
+		hostPool := pool.(*SingleHostPool)
+		return &Autocompleter{
+			pool: hostPool.Pool,
+			name: name,
+		}
+	case *MultiHostPool:
+		hostPool := pool.(*MultiHostPool)
+		return &Autocompleter{
+			pool: redis.NewPool(func() (redis.Conn, error) {
+			return hostPool.Get(), nil
+		}, maxConns),
+			name: name,
+		}
+	}
+	return nil
+}
+
 // Delete deletes the Autocompleter key for this AC
 func (a *Autocompleter) Delete() error {
 
@@ -40,7 +61,11 @@ func (a *Autocompleter) AddTerms(terms ...Suggestion) error {
 
 	i := 0
 	for _, term := range terms {
-		if err := conn.Send("FT.SUGADD", a.name, term.Term, term.Score); err != nil {
+		args := []interface{}{a.name, term.Term, term.Score}
+		if len(term.Payload) > 0{
+			args = append(args, "PAYLOAD", term.Payload)
+		}
+		if err := conn.Send("FT.SUGADD", args...); err != nil {
 			return err
 		}
 		i++
@@ -64,7 +89,7 @@ func (a *Autocompleter) Suggest(prefix string, num int, fuzzy bool) ([]Suggestio
 	conn := a.pool.Get()
 	defer conn.Close()
 
-	args := redis.Args{a.name, prefix, "MAX", num, "WITHSCORES"}
+	args := redis.Args{a.name, prefix, "MAX", num, "WITHSCORES", "WITHPAYLOADS"}
 	if fuzzy {
 		args = append(args, "FUZZY")
 	}
@@ -80,10 +105,7 @@ func (a *Autocompleter) Suggest(prefix string, num int, fuzzy bool) ([]Suggestio
 		if err != nil {
 			continue
 		}
-		ret = append(ret, Suggestion{Term: vals[i], Score: score})
-
+		ret = append(ret, Suggestion{Term: vals[i], Score: score, Payload:vals[i+2]})
 	}
-
 	return ret, nil
-
 }

@@ -4,9 +4,9 @@ import "sort"
 
 // Suggestion is a single suggestion being added or received from the Autocompleter
 type Suggestion struct {
-	Term    string
-	Score   float64
-	Payload string
+	Term    string  `json:"term"`
+	Score   float64 `json:"score"`
+	Payload string  `json:"payload"`
 }
 
 // SuggestionList is a sortable list of suggestions returned from an engine
