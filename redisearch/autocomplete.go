@@ -99,7 +99,7 @@ func (a *Autocompleter) Suggest(prefix string, num int, fuzzy bool) ([]Suggestio
 	}
 
 	ret := make([]Suggestion, 0, len(vals)/2)
-	for i := 0; i < len(vals); i += 2 {
+	for i := 0; i < len(vals); i += 3 {
 
 		score, err := strconv.ParseFloat(vals[i+1], 64)
 		if err != nil {
