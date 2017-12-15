@@ -1,6 +1,15 @@
 package redisearch
 
 import "sort"
+import "encoding/json"
+
+func SprintInterface(data interface{}) string {
+	b, err := json.Marshal(data)
+	if err != nil {
+		fmt.Println("json err:", err)
+	}
+	return string(b)
+}
 
 // Suggestion is a single suggestion being added or received from the Autocompleter
 type Suggestion struct {
