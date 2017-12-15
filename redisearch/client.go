@@ -53,7 +53,7 @@ func NewClient(addr, name string) *Client {
 	addrs := strings.Split(addr, ",")
 	var pool ConnPool
 	if len(addrs) == 1 {
-		pool = NewSingleHostPool(addrs[0])
+		pool = NewSingleHostPool(addrs[0], 0)
 	} else {
 		pool = NewMultiHostPool(addrs)
 	}
