@@ -9,6 +9,10 @@ type Suggestion struct {
 	Payload string  `json:"payload"`
 }
 
+func (s Suggestion)String() string{
+	return SprintInterface(s)
+}
+
 // SuggestionList is a sortable list of suggestions returned from an engine
 type SuggestionList []Suggestion
 
